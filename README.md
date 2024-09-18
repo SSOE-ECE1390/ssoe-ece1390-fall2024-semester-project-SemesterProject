@@ -5,11 +5,11 @@ This is the template repository that will be used to hold the semester project
 
 ## ECE 1390 White Page
 ### Description
-For our proposed project, we intend to implement a facial filter using two images the user will upload. The first image may contain the user, while the second image may contain any face/shape that the user would like to place over their own using a filter, outputting an edited version of the first image as the result. Additionally, we will be implementing a Bokeh effect on the output image. Typically, the Bokeh effect blurs the background of an image with circular points of focus, but we intend to use the face/shape provided in the second user inputted image to re-shape these points of focus.
+For our proposed project, we intend to implement a facial filter using two images the user will upload. The first image may contain the user, while the second image may contain any face/shape that the user would like to place over their own using a filter, outputting an edited version of the first image as the result. Additionally, we will be implementing a Bokeh effect on the output image. Typically, the Bokeh effect blurs the background of an image with circular points of focus, but we intend to use the face/shape provided in the second user inputted image to re-shape these points of focus. We intend to market this filter for use in various social media apps such as Snapchat or Instagram.
 
 
 ### Code Specifications
-We plan to use python to implement our facial filter and Bokeh effect. We will likely be using multiple image processing libraries provided in python, including OpenCV, SciPy, Scikit-Image, and others.
+We plan to use python to implement our facial filter and Bokeh effect. We will likely be using multiple image processing libraries provided in python, including OpenCV, SciPy, Scikit-Image, and others. Our first input image can be an any aspect ratio and will support up to 4K resolution, with three colors (RGB). The second image must be square, but will support up to 1000x1000 and 3 be RGB. Our output image will be the same resolution and format as the input.
 
 ### Planned Approach
 We plan to divide up each required method so that each person implements 1-2 methods to satisfy the requirements. We will separate into two groups, one which focuses on the filtering algorithms, and one which focuses on the facial recognition algorithm. The filtering algorithms will include edge detection to determine the shape of the cartoon face/shape, the boke convolution blur based on that edge detected shape, and general image enhancement (such as auto-contrast/saturation). The facial recognition team will likely work with ML, though this will partially depend on the topics covered in lectures.
