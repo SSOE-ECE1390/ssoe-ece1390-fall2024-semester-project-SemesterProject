@@ -4,13 +4,14 @@ import random
 import matplotlib.pyplot as plt
 
 def random_adjust_brightness(img):
+    img.astype("uint8")
     print("Runnning random_adjust_brightness...")
     
     val = 0 
     while val == 0: # exclude 0 from possible val range
         val = random.randrange(-255, 255, 51)
     print("using random value: ", val)
-
+    print("\n")
 
     matrix = np.ones(img.shape, dtype="uint8") * val
 
