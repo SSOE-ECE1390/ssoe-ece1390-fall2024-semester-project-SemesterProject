@@ -1,0 +1,80 @@
+name: Create or Update Pull Request
+
+on:
+  push:
+    branches: []
+
+jobs:
+  create-or-update-pr:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up GitHub CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install gh
+
+      - name: Authenticate GitHub CLI
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+
+      - name: Check for Existing Pull Request
+        id: check_pr
+        run: |
+          base_branch="main"
+          feature_branch="${{ github.ref_name }}"
+          
+          # Check if a PR already exists for the branch
+          pr_number=$(gh pr list --base "$base_branch" --head "$feature_branch" --json number --jq '.[0].number')
+          
+          if [ -n "$pr_number" ]; then
+            echo "pr_number=$pr_number" >> $GITHUB_ENV
+            echo "pr_exists=true" >> $GITHUB_ENV
+          else
+            echo "pr_exists=false" >> $GITHUB_ENV
+          fi
+
+      - name: Get Latest PR Version
+        if: env.pr_exists == 'false'
+        id: get_version
+        run: |
+          base_branch="main"
+
+          # Fetch closed PRs and filter titles with the format 'Release vX.X'
+          echo "Fetching closed PRs with format 'Release vX.X'..."
+          pr_titles=$(gh pr list --base "$base_branch" --state closed --json title --jq '.[] | select(.title | test("^Release v[0-9]+\\.[0-9]+$")) | .title')
+
+          echo "Fetched closed PR titles:"
+          echo "$pr_titles"
+
+          latest_pr=$(echo "$pr_titles" | sort -r | head -n 1)
+
+          if [ -n "$latest_pr" ]; then
+            # Extract the version number and increment it by 0.1
+            version=$(echo "$latest_pr" | grep -oE '[0-9]+\.[0-9]+' | awk -F. '{printf "%d.%d", $1, $2 + 1}')
+            echo "New PR Version:"
+            echo "$version"
+          else
+            version="0.0"
+            echo "PR Version:"
+            echo "$version"
+          fi
+          echo "new_version=$version" >> $GITHUB_ENV
+
+      - name: Create PR
+        if: env.pr_exists == 'false'
+        run: |
+          base_branch="main"
+          feature_branch="${{ github.ref_name }}"
+          latest_commit_message="${{ github.event.head_commit.message }}"
+
+          # Create a new PR if none exists
+          pr_title="Release v${{ env.new_version }}"
+          pr_body="History of commits can be found below.</br>Additional Comments:"
+          gh pr create --base "$base_branch" --head "$feature_branch" --title "$pr_title" --body "$pr_body"
