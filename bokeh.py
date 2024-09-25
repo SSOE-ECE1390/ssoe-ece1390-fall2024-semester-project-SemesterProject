@@ -4,7 +4,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Read Image
-image_bgr = cv2.imread(os.path.relpath("Input/fireworks.jpg"))
+filename = "Comiccon_Decals_Square_for_Shopify-42"
+file_extension = "webp"
+image_bgr = cv2.imread(os.path.relpath(f"Input/{filename}.{file_extension}"))
 image_rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
 
 # Convert to linear (gamma correction, as images are stored in sRGB)
@@ -15,7 +17,7 @@ image_linear = np.pow(np.float32(image_rgb)/255, gamma)
 
 
 # Generate circular kernel
-kernel_size = 21
+kernel_size = 11
 kernel_radius = int(kernel_size/2)
 x,y = np.indices([kernel_size, kernel_size])
 x -= kernel_radius
@@ -32,7 +34,7 @@ image_bokeh = np.ubyte(np.pow(image_bokeh_linear, 1/gamma) * 255)
 
 
 # Store results to file
-cv2.imwrite("Output/fireworks_bokeh.jpg", cv2.cvtColor(image_bokeh, cv2.COLOR_RGB2BGR))
+cv2.imwrite(f"Output/{filename}_bokeh.{file_extension}", cv2.cvtColor(image_bokeh, cv2.COLOR_RGB2BGR))
 
 # Plot results
 plt.subplot(121);plt.imshow(image_rgb)
