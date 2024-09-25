@@ -4,8 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Read Image
-filename = "Comiccon_Decals_Square_for_Shopify-42"
-file_extension = "webp"
+filename = "fireworks"
+file_extension = "jpg"
 image_bgr = cv2.imread(os.path.relpath(f"Input/{filename}.{file_extension}"))
 image_rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
 
@@ -17,14 +17,20 @@ image_linear = np.pow(np.float32(image_rgb)/255, gamma)
 
 
 # Generate circular kernel
-kernel_size = 11
-kernel_radius = int(kernel_size/2)
-x,y = np.indices([kernel_size, kernel_size])
-x -= kernel_radius
-y -= kernel_radius
-r = np.sqrt(x**2+y**2)
+# kernel_size = 51
+# kernel_radius = int(kernel_size/2)
+# x,y = np.indices([kernel_size, kernel_size])
+# x -= kernel_radius
+# y -= kernel_radius
+# r = np.sqrt(x**2+y**2)
 
-kernel = (r <= kernel_radius).astype(float) / (kernel_size*kernel_size)
+# kernel = (np.logical_and(r <= kernel_radius, x >= 0)).astype(float) / (kernel_size*kernel_size)
+
+
+# Generate kernel from file
+kernel_file = "Input/star.png"
+kernel = np.float32(cv2.imread(os.path.relpath(kernel_file), cv2.IMREAD_GRAYSCALE)) / 255
+kernel /= kernel.shape[0] * kernel.shape[1]
 
 # Apply Bokeh Filter
 image_bokeh_linear = cv2.filter2D(image_linear, ddepth=-1, kernel=kernel)
