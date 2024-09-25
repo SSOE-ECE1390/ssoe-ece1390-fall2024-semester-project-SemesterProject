@@ -31,6 +31,7 @@ image_linear = np.pow(np.float32(image_rgb)/255, gamma)
 kernel_file = "Input/star.png"
 kernel = np.float32(cv2.imread(os.path.relpath(kernel_file), cv2.IMREAD_GRAYSCALE)) / 255
 kernel /= kernel.shape[0] * kernel.shape[1]
+kernel = np.flip(kernel)
 
 # Apply Bokeh Filter
 image_bokeh_linear = cv2.filter2D(image_linear, ddepth=-1, kernel=kernel)
