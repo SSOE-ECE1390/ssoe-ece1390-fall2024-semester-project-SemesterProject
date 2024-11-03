@@ -22,4 +22,4 @@ path2 = 'Input/Comiccon_Decals_Square_for_Shopify-42.webp'
 # plt.axis("off")
 # plt.show()
 
-f5.img_overlay(path, path2)
+f5.img_overlay2(path, path2)
