@@ -13,4 +13,4 @@ def img_segment_people(path):
         if class_id == 0:  # 0 represents 'person' in COCO dataset
             person_masks.append(segmask['masks'][:, :, i])
     output_path = "Output/people_segmented_img.png"
-    cv2.imwrite(output_path, segmask)
+    cv2.imwrite(output_path, person_masks[0])
