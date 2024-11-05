@@ -8,6 +8,7 @@ import img_filter as f2
 import face_detection as f3
 import img_segmentation as f4
 import img_overlay as f5
+import img_people_segmentation as f6
 
 path = 'Input/1 (1).jpeg'
 path2 = 'Input/Comiccon_Decals_Square_for_Shopify-42.webp'
@@ -22,4 +23,6 @@ path2 = 'Input/Comiccon_Decals_Square_for_Shopify-42.webp'
 # plt.axis("off")
 # plt.show()
 
-f5.img_overlay2(path, path2)
+# f5.img_overlay2(path, path2)
+
+f6.img_segment_people(path2)
