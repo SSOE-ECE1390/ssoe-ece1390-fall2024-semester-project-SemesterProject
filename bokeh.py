@@ -28,9 +28,10 @@ image_linear = np.pow(np.float32(image_rgb)/255, gamma)
 
 
 # Generate kernel from file
-kernel_file = "Input/star.png"
+kernel_name = "star"
+kernel_file = f"Input/{kernel_name}.png"
 kernel = np.float32(cv2.imread(os.path.relpath(kernel_file), cv2.IMREAD_GRAYSCALE)) / 255
-kernel /= kernel.shape[0] * kernel.shape[1]
+kernel /= np.sum(kernel)
 kernel = np.flip(kernel)
 
 # Apply Bokeh Filter
@@ -41,7 +42,7 @@ image_bokeh = np.ubyte(np.pow(image_bokeh_linear, 1/gamma) * 255)
 
 
 # Store results to file
-cv2.imwrite(f"Output/{filename}_bokeh.{file_extension}", cv2.cvtColor(image_bokeh, cv2.COLOR_RGB2BGR))
+cv2.imwrite(f"Output/{filename}_bokeh_{kernel_name}.{file_extension}", cv2.cvtColor(image_bokeh, cv2.COLOR_RGB2BGR))
 
 # Plot results
 plt.subplot(121);plt.imshow(image_rgb)
