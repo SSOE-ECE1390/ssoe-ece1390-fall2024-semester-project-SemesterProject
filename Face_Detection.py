@@ -3,6 +3,9 @@ import numpy as np
 import math
 import cv2
 
+from mediapipe.tasks import python
+from mediapipe.tasks.python import vision
+
 from Hair_Detection import detect_hair
 
 def detect_face(image_rgb, image_resized, width, height):
@@ -23,13 +26,13 @@ def detect_face(image_rgb, image_resized, width, height):
         # Check if landmarks are detected
         if results.multi_face_landmarks:
             for face_landmarks in results.multi_face_landmarks:
-                # Draw facial landmarks on the image (optional)
-                #mp_drawing.draw_landmarks(
-                    #image_resized,
-                    #face_landmarks,
-                    #mp_face_mesh.FACEMESH_CONTOURS,
-                    #mp_drawing.DrawingSpec(color=(0, 255, 0), thickness=1, circle_radius=1),
-                    #mp_drawing.DrawingSpec(color=(0, 0, 255), thickness=1))
+                # # Draw facial landmarks on the image (optional)
+                # mp_drawing.draw_landmarks(
+                #     image_resized,
+                #     face_landmarks,
+                #     mp_face_mesh.FACEMESH_CONTOURS,
+                #     mp_drawing.DrawingSpec(color=(0, 255, 0), thickness=1, circle_radius=1),
+                #     mp_drawing.DrawingSpec(color=(0, 0, 255), thickness=1))
 
                 # Get bounding box coordinates
                 face_coords = [(landmark.x, landmark.y) for landmark in face_landmarks.landmark]
@@ -57,16 +60,20 @@ def detect_face(image_rgb, image_resized, width, height):
                 delta_x = x2 - x1
                 delta_y = y2 - y1
                 angle = math.atan2(delta_y, delta_x) * 180 / math.pi
-                # Extract specific landmark points
-                forehead_points = [(int(face_landmarks.landmark[i].x * image_resized.shape[1]), 
-                                    int(face_landmarks.landmark[i].y * image_resized.shape[0])) for i in [10, 338, 297, 332]]
-                jawline_points = [(int(face_landmarks.landmark[i].x * image_resized.shape[1]), 
-                                int(face_landmarks.landmark[i].y * image_resized.shape[0])) for i in [152, 379, 400, 152]]
+
+                forehead_landmark = [162, 21, 54, 103, 67, 109, 10, 338, 297, 332, 284, 251, 389, 356]
+                jaw_landmarks = [93, 132, 56, 172, 136, 150, 149, 176, 146, 152, 377, 400, 378, 379, 365, 197, 288, 361, 323]
+                
+                face_outer_landmarks = [10, 338, 297, 332, 284, 251, 389, 356, 323, 361, 288, 397, 365, 379, 378, 400, 377, 152, 148, 176, 149, 150, 136, 172, 58, 132, 93, 234, 127, 162, 21, 54, 103, 67, 109]
             
-                # Detect hair and facial hair
-                hair_present, facial_hair_present = detect_hair(image_resized, forehead_points, jawline_points)
-                print("Hair Present:", hair_present)
-                print("Facial Hair Present:", facial_hair_present)
+                face_outer_points = [(int(face_landmarks.landmark[i].x * image_resized.shape[1]), 
+                                      int(face_landmarks.landmark[i].y * image_resized.shape[0])) for i in face_outer_landmarks]
+                
+                image = detect_hair(image_resized, face_outer_points)
+                cv2.imshow('Hair Segmented', image)
+                cv2.waitKey(0)
+                cv2.destroyAllWindows()
+                
                 return angle, x_max, x_min, y_max, y_min
         else:
             print("No facial landmarks detected.")

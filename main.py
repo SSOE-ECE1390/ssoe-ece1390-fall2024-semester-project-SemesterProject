@@ -1,5 +1,7 @@
 import cv2
 import os
+import matplotlib.pyplot as plt
+import numpy as np
 
 from Hair_Detection import detect_hair
 from Face_Detection import detect_face
@@ -11,10 +13,12 @@ os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
 # Paths to images and emojis
 image_paths = {'Data/Tiger_Woods.jpeg', 'Data/jim.jpg', 'Data/crying_stock_photo.png'}
+temp_path = {'Data/jim.jpg'}
 
-for image_path in image_paths:
+for image_path in temp_path:
     # Load the image
     image = cv2.imread(image_path)
+    image_filename = os.path.basename(image_path)
 
     # Check if the image was loaded successfully
     if image is None:
@@ -32,7 +36,7 @@ for image_path in image_paths:
     # Convert the resized image to RGB as Mediapipe requires
     image_rgb = cv2.cvtColor(image_resized, cv2.COLOR_BGR2RGB)
 
-    emotion = detect_emotion(image_resized)
+    emotion = detect_emotion(image_rgb)
     angle, x_max, x_min, y_max, y_min = detect_face(image_rgb, image_resized, width, height)
     image_emoji = swap_emoji(image_resized.copy(), emotion, angle, x_max, x_min, y_max, y_min)
     
@@ -42,3 +46,8 @@ for image_path in image_paths:
     cv2.moveWindow('Emoji Face Swap', 0, 200)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+
+    plt.imshow(image_emoji)
+    output_filename = 'emoji_'+ image_filename 
+    plt.savefig(f'output/{output_filename}')
+
