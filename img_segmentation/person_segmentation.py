@@ -5,7 +5,7 @@ import os
 import matplotlib.pyplot as plt
 
 # Source: https://github.com/google-ai-edge/mediapipe/blob/master/docs/solutions/selfie_segmentation.md
-def segment_person(image_path):
+def segment_person(image_path, output_path="test"):
     mp_drawing = mp.solutions.drawing_utils
     mp_selfie_segmentation = mp.solutions.selfie_segmentation
 
@@ -29,7 +29,7 @@ def segment_person(image_path):
         bg_image = np.zeros(image.shape, dtype=np.uint8)
         bg_image[:] = BG_COLOR
         output_image = np.where(condition, fg_image, bg_image)
-        output_path = os.path.abspath("Output/SeparateBackground/test.png")
+        output_path = os.path.abspath(f"Output/SeparateBackground/{output_path}.png")
         cv2.imwrite(output_path, output_image)
         # plt.imshow(results.segmentation_mask > 0.1, cmap='gray')
         # plt.show()
