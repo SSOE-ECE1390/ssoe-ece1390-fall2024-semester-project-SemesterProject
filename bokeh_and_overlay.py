@@ -9,7 +9,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-def bokeh_bg(face_path, icon_path, background_path, icon_mask_path=os.path.abspath("Output/SeparateIcon/test2.jpeg"), output_path="test"):
+def bokeh_bg(face_path, icon_path, background_path, bokeh_selector=1, bokeh_effect="star", icon_mask_path=os.path.abspath("Output/SeparateIcon/test2.jpeg"), output_path="test"):
     face = cv2.imread(face_path)
     plt.imshow(cv2.cvtColor(face, cv2.COLOR_BGR2RGB))
     plt.title("Face")
@@ -53,7 +53,19 @@ def bokeh_bg(face_path, icon_path, background_path, icon_mask_path=os.path.abspa
     plt.title("Masked Icon")
     plt.show()
 
-    background_with_bokeh = bokeh.bokeh_blur(background, icon_mask, cv2.cvtColor(background, cv2.COLOR_BGR2GRAY))
+    if bokeh_selector == 1:
+        kernel_name = bokeh_effect
+        kernel_file = f"Input/Effect/{kernel_name}.png"
+        kernel = np.float32(cv2.imread(kernel_file))
+    else:
+        target_height, target_width = face.shape[:2]
+        resized_icon = cv2.resize(icon_mask, (int(target_height*.10), int(target_width*0.10)))
+        kernel = np.float32(resized_icon)
+        plt.imshow(resized_icon)
+        plt.title("Resized Icon (for Bokeh Effect)")
+        plt.show()
+        
+    background_with_bokeh = bokeh.bokeh_blur(background, kernel, cv2.cvtColor(background, cv2.COLOR_BGR2GRAY))
     plt.imshow(cv2.cvtColor(background_with_bokeh, cv2.COLOR_BGR2RGB))
     plt.title("Bokeh Background")
     plt.show()
@@ -79,7 +91,7 @@ face_path = os.path.abspath("Input/Face/HL-005.jpeg")
 icon_path = os.path.abspath("Input/Icon/spongebob.jpeg")
 background_path = os.path.abspath("Input/Background/fireworks.jpg")
 icon_mask = icon_segmentation.segment_iconv2(icon_path)
-bokeh_background = bokeh_bg(face_path, icon_path, background_path)
+bokeh_background = bokeh_bg(face_path, icon_path, background_path, bokeh_selector=0)
 result = img_overlayv2.img_overlay(bokeh_background, icon_path)
 # result = compilation(face_path, icon_path, background_path)
 

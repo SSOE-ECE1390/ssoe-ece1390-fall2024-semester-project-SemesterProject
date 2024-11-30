@@ -65,7 +65,7 @@ def img_overlay(image, icon_path, icon_mask_path=os.path.abspath("Output/Separat
                 np.where(binary_mask_resized > 0, overlay_resized[:, :, c], img[overlay_y:overlay_y + overlay_resized.shape[0], overlay_x:overlay_x + overlay_resized.shape[1], c])
 
     # Save the final image
-    plt.imshow(img)
+    plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
     plt.title("Image Overlay")
     plt.show()
     output_path = os.path.abspath(f"Output/Overlay/{output_path}.jpeg")
