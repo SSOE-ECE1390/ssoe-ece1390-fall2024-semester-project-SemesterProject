@@ -2,6 +2,13 @@ import cv2
 import numpy as np
 import os
 
+import mediapipe as mp
+from mediapipe.tasks import python
+from mediapipe.tasks.python import vision
+from mediapipe.tasks.python.components import containers
+import math
+import matplotlib.pyplot as plt
+
 def segment_icon(path):
     image = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
 
@@ -25,6 +32,60 @@ def segment_icon(path):
     cv2.imwrite(output_path, mask)
     return [output_path, mask]
 
+# Source: https://colab.research.google.com/github/googlesamples/mediapipe/blob/main/examples/interactive_segmentation/python/interactive_segmenter.ipynb#scrollTo=Yl_Oiye4mUuo
+def segment_iconv2(path, model_p = os.path.abspath("Input/Other/magic_touch.tflite")):
+    BG_COLOR = (0, 0, 0) # black
+    MASK_COLOR = (255, 255, 255) # white
+
+    RegionOfInterest = vision.InteractiveSegmenterRegionOfInterest
+    NormalizedKeypoint = containers.keypoint.NormalizedKeypoint
+
+    # Create the options that will be used for InteractiveSegmenter
+    print("Current working directory:", os.getcwd())
+    model_path = model_p
+    base_options = python.BaseOptions(model_asset_path=model_path)
+    options = vision.ImageSegmenterOptions(base_options=base_options,
+                                        output_category_mask=True)
+    
+    # Create the interactive segmenter
+    with vision.InteractiveSegmenter.create_from_options(options) as segmenter:
+        # Create the MediaPipe image file that will be segmented
+        image = mp.Image.create_from_file(path)
+
+        # Retrieve the masks for the segmented image
+        roi = RegionOfInterest(format=RegionOfInterest.Format.KEYPOINT,
+                            keypoint=NormalizedKeypoint(x=0.68, y=0.68))
+        
+        segmentation_result = segmenter.segment(image, roi)
+        category_mask = segmentation_result.category_mask
+        # Generate solid color images for showing the output segmentation mask.
+        image_data = image.numpy_view()
+        fg_image = np.zeros(image_data.shape, dtype=np.uint8)
+        # fg_image = fg_image[:, :, :3]
+        fg_image[:] = MASK_COLOR
+        bg_image = np.zeros(image_data.shape, dtype=np.uint8)
+        # bg_image = bg_image[:, :, :3]
+        bg_image[:] = BG_COLOR
+
+        condition = np.stack((category_mask.numpy_view(),) * 3, axis=-1) > 0.1
+        output_image = np.where(condition, fg_image, bg_image)
+
+        # # Draw a white dot with black border to denote the point of interest
+        # radius, thickness = 6, -1
+        # cv2.circle(output_image, (center_x, center_y), radius + 5, (0, 0, 0), thickness)
+        # cv2.circle(output_image, (center_x, center_y), radius, (255, 255, 255), thickness)
+
+        output_path = os.path.abspath("Output/SeparateIcon/test2.png")
+        cv2.imwrite(output_path, output_image)
+        return output_image
+    
 # example usage
-image_path = os.path.abspath("Input/Icon/Comiccon_Decals_Square_for_Shopify-42.webp")
+# NOTE: must be jpeg
+image_path = os.path.abspath("Input/Icon/spongebob.png")
+# image_path = os.path.abspath("Input/Icon/cats_and_dogs.png")
+img = cv2.imread(image_path, cv2.COLOR_BGR2RGB)
+image_path = os.path.abspath("Input/Icon/spongebob.jpeg")
+cv2.imwrite(image_path, img)
+
 segment_icon(image_path)
+segment_iconv2(image_path)

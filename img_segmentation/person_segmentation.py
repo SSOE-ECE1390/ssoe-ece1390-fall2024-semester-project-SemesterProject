@@ -2,6 +2,7 @@ import cv2
 import mediapipe as mp
 import numpy as np
 import os
+import matplotlib.pyplot as plt
 
 # Source: https://github.com/google-ai-edge/mediapipe/blob/master/docs/solutions/selfie_segmentation.md
 def segment_person(image_path):
@@ -30,7 +31,12 @@ def segment_person(image_path):
         output_image = np.where(condition, fg_image, bg_image)
         output_path = os.path.abspath("Output/SeparateBackground/test.png")
         cv2.imwrite(output_path, output_image)
+        # plt.imshow(results.segmentation_mask > 0.1, cmap='gray')
+        # plt.show()
 
-# example usage
-image_path = os.path.abspath("Input/Face/1 (1).jpeg")
-segment_person(image_path)
+        binary_mask = (results.segmentation_mask > 0.1).astype(np.uint8) * 255
+        return binary_mask
+
+# # example usage
+# image_path = os.path.abspath("Input/Face/1 (1).jpeg")
+# segment_person(image_path)

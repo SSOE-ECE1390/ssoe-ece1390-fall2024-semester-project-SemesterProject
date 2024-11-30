@@ -1,25 +1,27 @@
 import cv2
 import numpy as np
 import os
+import matplotlib.pyplot as plt
 
-def img_overlay(face_path, icon_path):
+def img_overlay(face, icon, icon_mask):
     # Load Haar cascade classifiers for face detection
     face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
     eye_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_eye.xml')  # Optional: Use for eye detection
 
     # Load the input image and convert to grayscale
-    img = cv2.imread(face_path)
+    img = face
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     # Detect faces in the input image
     faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
 
     # Load the overlay image (black mask with white background)
-    face_overlay = cv2.imread(icon_path)
+    face_overlay = icon
 
     # Convert the overlay to grayscale and create a binary mask
     overlay_gray = cv2.cvtColor(face_overlay, cv2.COLOR_BGR2GRAY)
-    _, binary_mask = cv2.threshold(overlay_gray, 128, 255, cv2.THRESH_BINARY_INV)
+    # _, binary_mask = cv2.threshold(overlay_gray, 128, 255, cv2.THRESH_BINARY_INV)
+    binary_mask = icon_mask
 
     if len(faces) > 0:
         # Use the first detected face only
@@ -62,11 +64,21 @@ def img_overlay(face_path, icon_path):
                 np.where(binary_mask_resized > 0, overlay_resized[:, :, c], img[overlay_y:overlay_y + overlay_resized.shape[0], overlay_x:overlay_x + overlay_resized.shape[1], c])
 
     # Save the final image
-    output_path = os.path.abspath("Output/Overlay/test.png")
+    output_path = os.path.abspath("Output/Overlay/test.jpeg")
     cv2.imwrite(output_path, img)
-    print("Output image saved as 'test.png'.")
+    print("Output image saved as 'test.jpeg'.")
 
-# example usage
-face_path = os.path.abspath("Input/Face/1 (1).jpeg")
-icon_path = os.path.abspath("Input/Icon/Comiccon_Decals_Square_for_Shopify-42.webp")
-img_overlay(face_path, icon_path)
+# # example usage
+# face_path = os.path.abspath("Input/Face/1 (1).jpeg")
+# face_path = os.path.abspath("Output/BokehEffect/test.png")
+# face = cv2.imread(face_path)
+# # icon_path = os.path.abspath("Input/Icon/Comiccon_Decals_Square_for_Shopify-42.webp")
+# icon_path = os.path.abspath("Input/Icon/spongebob.jpeg")
+# icon = cv2.imread(icon_path)
+# icon_mask_path = os.path.abspath("Output/SeparateIcon/test2.png")
+# icon_mask = cv2.bitwise_not(cv2.imread(icon_mask_path))
+# icon = cv2.bitwise_and(icon_mask, icon)
+# binary_icon_mask = np.all(icon_mask == [255, 255, 255], axis=-1).astype(np.uint8) * 255
+# plt.imshow(icon_mask)
+# plt.show()
+# img_overlay(face, icon, binary_icon_mask)
