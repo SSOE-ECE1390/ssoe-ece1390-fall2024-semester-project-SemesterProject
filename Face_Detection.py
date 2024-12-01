@@ -10,13 +10,12 @@ os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
 # Initialize Mediapipe Face Mesh
 mp_face_mesh = mp.solutions.face_mesh
-mp_drawing = mp.solutions.drawing_utils
 
 # Initialize FER for emotion detection
 emotion_detector = FER(mtcnn=True)
 
 # Paths to images and emojis
-image_paths = ['Data/Tiger_Woods.jpeg', 'Data/jim.jpg', 'Data/crying_stock_photo.png']
+image_paths = [ 'Data/jim.jpg', 'Data/crying_stock_photo.png', 'Data/AngryMan.jpg']
 emoji_folder = 'emojis'
 
 # Emotion to emoji mapping
@@ -75,13 +74,13 @@ for image_path in image_paths:
         # Check if landmarks are detected
         if results.multi_face_landmarks:
             for face_landmarks in results.multi_face_landmarks:
-                # Draw facial landmarks on the image (optional)
-                mp_drawing.draw_landmarks(
-                    image_resized,
-                    face_landmarks,
-                    mp_face_mesh.FACEMESH_CONTOURS,
-                    mp_drawing.DrawingSpec(color=(0, 255, 0), thickness=1, circle_radius=1),
-                    mp_drawing.DrawingSpec(color=(0, 0, 255), thickness=1))
+                # Optional: Remove the landmark drawing
+                # mp_drawing.draw_landmarks(
+                #     image_resized,
+                #     face_landmarks,
+                #     mp_face_mesh.FACEMESH_CONTOURS,
+                #     mp_drawing.DrawingSpec(color=(0, 255, 0), thickness=1, circle_radius=1),
+                #     mp_drawing.DrawingSpec(color=(0, 0, 255), thickness=1))
 
                 # Get bounding box coordinates
                 face_coords = [(landmark.x, landmark.y) for landmark in face_landmarks.landmark]
@@ -92,7 +91,7 @@ for image_path in image_paths:
                 y_max = int(np.max(face_coords[:, 1]) * height)
 
                 # Scale the bounding box to cover more face area
-                scale_factor = 1.2  # Scale factor for emoji size
+                scale_factor = 1.12  # Reduced scale factor for slightly smaller emoji
                 box_width = int((x_max - x_min) * scale_factor)
                 box_height = int((y_max - y_min) * scale_factor)
 
