@@ -5,6 +5,8 @@ import numpy as np
 from fer import FER
 import math
 import os
+from HairDetectionDillon import detect_brown_short_hair
+from HairDetectionDillon import overlay_hair_emoji
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
@@ -17,6 +19,7 @@ emotion_detector = FER(mtcnn=True)
 
 # Paths to images and emojis
 image_paths = ['Data/jim.jpg', 'Data/crying_stock_photo.png', 'Data/AngryMan.jpg', 'Data/SmilingGirl.jpg']
+hair_emoji_path = 'emojis/brown_short.png'
 emoji_folder = 'emojis'
 
 # Emotion to emoji mapping
@@ -142,16 +145,19 @@ for image_path in image_paths:
                 if emoji_rotated.shape[2] == 4:
                     emoji_bgr, alpha_mask = emoji_rotated[:, :, :3], emoji_rotated[:, :, 3] / 255.0
                     roi = image_resized[y_min:y_max, x_min:x_max]
-
+                    image_altered = image_resized.copy()
                     if roi.shape[:2] == emoji_bgr.shape[:2]:
                         for c in range(3):
                             roi[:, :, c] = (alpha_mask * emoji_bgr[:, :, c] +
                                             (1 - alpha_mask) * roi[:, :, c])
-                        image_resized[y_min:y_max, x_min:x_max] = roi
+                        image_altered[y_min:y_max, x_min:x_max] = roi
                     else:
                         print("Size mismatch between ROI and emoji. Skipping this face.")
                 else:
                     print("Emoji image does not have an alpha channel.")
+                forehead_coords = detect_brown_short_hair(image_resized, face_landmarks, width, height)
+                # Overlay the hair emoji
+                image_altered = overlay_hair_emoji(image_altered, hair_emoji_path, forehead_coords)
         else:
             print("No facial landmarks detected.")
 
@@ -172,13 +178,13 @@ for image_path in image_paths:
     # Save the morphologically transformed image
     cv2.imwrite(f"output/morph_{os.path.basename(image_path)}", image_morph)
     # Save the final image with emoji overlay
-    cv2.imwrite(f"output/final_{os.path.basename(image_path)}", image_resized)
+    cv2.imwrite(f"output/final_{os.path.basename(image_path)}", image_altered)
 
     # Resize the final image for a larger display
     display_scale = 1.5
-    display_width = int(image_resized.shape[1] * display_scale)
-    display_height = int(image_resized.shape[0] * display_scale)
-    image_display = cv2.resize(image_resized, (display_width, display_height), interpolation=cv2.INTER_LINEAR)
+    display_width = int(image_altered.shape[1] * display_scale)
+    display_height = int(image_altered.shape[0] * display_scale)
+    image_display = cv2.resize(image_altered, (display_width, display_height), interpolation=cv2.INTER_LINEAR)
 
     # Show the enlarged image
     cv2.imshow('Emoji Face Swap', image_display)
