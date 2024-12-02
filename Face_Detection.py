@@ -1,3 +1,4 @@
+
 import cv2
 import mediapipe as mp
 import numpy as np
@@ -15,12 +16,12 @@ mp_face_mesh = mp.solutions.face_mesh
 emotion_detector = FER(mtcnn=True)
 
 # Paths to images and emojis
-image_paths = [ 'Data/jim.jpg', 'Data/crying_stock_photo.png', 'Data/AngryMan.jpg']
+image_paths = ['Data/jim.jpg', 'Data/crying_stock_photo.png', 'Data/AngryMan.jpg', 'Data/SmilingGirl.jpg']
 emoji_folder = 'emojis'
 
 # Emotion to emoji mapping
 emotion_emoji_dict = {
-    'happy': 'smiling.png', 
+    'happy': 'smiling.png',
     'sad': 'disappointed.png',
     'angry': 'angry.png',
     'surprise': 'astonished.png',
@@ -46,11 +47,33 @@ for image_path in image_paths:
     dim = (width, height)
     image_resized = cv2.resize(image, dim, interpolation=cv2.INTER_AREA)
 
-    # Convert the resized image to RGB as Mediapipe requires
-    image_rgb = cv2.cvtColor(image_resized, cv2.COLOR_BGR2RGB)
+    ### Requirement: Include an image enhancement method (Histogram Equalization)
+    # Convert image to YUV color space
+    image_yuv = cv2.cvtColor(image_resized, cv2.COLOR_BGR2YUV)
+    # Equalize the histogram of the Y channel
+    image_yuv[:, :, 0] = cv2.equalizeHist(image_yuv[:, :, 0])
+    # Convert back to BGR color space
+    image_enhanced = cv2.cvtColor(image_yuv, cv2.COLOR_YUV2BGR)
+    # Use the enhanced image for further processing
+    image_to_process = image_enhanced
+
+    ### Requirement: Include an image filtering method (Gaussian Blur)
+    image_filtered = cv2.GaussianBlur(image_to_process, (5, 5), 0)
+
+    ### Requirement: Include an edge detection method (Canny Edge Detection)
+    # Convert to grayscale for edge detection
+    image_gray = cv2.cvtColor(image_filtered, cv2.COLOR_BGR2GRAY)
+    edges = cv2.Canny(image_gray, 100, 200)
+
+    ### Requirement: Demonstrate segmentation (Thresholding)
+    # Apply binary thresholding
+    _, segmented_image = cv2.threshold(image_gray, 127, 255, cv2.THRESH_BINARY)
+
+    # Convert the filtered image to RGB as Mediapipe requires
+    image_rgb = cv2.cvtColor(image_filtered, cv2.COLOR_BGR2RGB)
 
     # Detect emotions using FER
-    emotion_results = emotion_detector.detect_emotions(image_resized)
+    emotion_results = emotion_detector.detect_emotions(image_filtered)
 
     emotion = 'neutral'  # Default emotion if none are detected
     if emotion_results:
@@ -74,14 +97,6 @@ for image_path in image_paths:
         # Check if landmarks are detected
         if results.multi_face_landmarks:
             for face_landmarks in results.multi_face_landmarks:
-                # Optional: Remove the landmark drawing
-                # mp_drawing.draw_landmarks(
-                #     image_resized,
-                #     face_landmarks,
-                #     mp_face_mesh.FACEMESH_CONTOURS,
-                #     mp_drawing.DrawingSpec(color=(0, 255, 0), thickness=1, circle_radius=1),
-                #     mp_drawing.DrawingSpec(color=(0, 0, 255), thickness=1))
-
                 # Get bounding box coordinates
                 face_coords = [(landmark.x, landmark.y) for landmark in face_landmarks.landmark]
                 face_coords = np.array(face_coords)
@@ -119,7 +134,9 @@ for image_path in image_paths:
                 # Resize and rotate the emoji
                 emoji_resized = cv2.resize(emoji_image, (box_width, box_height), interpolation=cv2.INTER_AREA)
                 rotation_matrix = cv2.getRotationMatrix2D((box_width // 2, box_height // 2), angle, 1.0)
-                emoji_rotated = cv2.warpAffine(emoji_resized, rotation_matrix, (box_width, box_height), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT, borderValue=(0, 0, 0, 0))
+                emoji_rotated = cv2.warpAffine(
+                    emoji_resized, rotation_matrix, (box_width, box_height),
+                    flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT, borderValue=(0, 0, 0, 0))
 
                 # Overlay emoji onto face region
                 if emoji_rotated.shape[2] == 4:
@@ -128,7 +145,8 @@ for image_path in image_paths:
 
                     if roi.shape[:2] == emoji_bgr.shape[:2]:
                         for c in range(3):
-                            roi[:, :, c] = (alpha_mask * emoji_bgr[:, :, c] + (1 - alpha_mask) * roi[:, :, c])
+                            roi[:, :, c] = (alpha_mask * emoji_bgr[:, :, c] +
+                                            (1 - alpha_mask) * roi[:, :, c])
                         image_resized[y_min:y_max, x_min:x_max] = roi
                     else:
                         print("Size mismatch between ROI and emoji. Skipping this face.")
@@ -136,6 +154,25 @@ for image_path in image_paths:
                     print("Emoji image does not have an alpha channel.")
         else:
             print("No facial landmarks detected.")
+
+    ### Requirement: Incorporate 1 additional method from class code (Morphological Transformation)
+    # Apply morphological closing to the segmented image
+    kernel = np.ones((5, 5), np.uint8)
+    image_morph = cv2.morphologyEx(segmented_image, cv2.MORPH_CLOSE, kernel)
+
+    ### Save the processed images
+    # Save the enhanced image
+    cv2.imwrite(f"output/enhanced_{os.path.basename(image_path)}", image_enhanced)
+    # Save the filtered image
+    cv2.imwrite(f"output/filtered_{os.path.basename(image_path)}", image_filtered)
+    # Save the edge-detected image
+    cv2.imwrite(f"output/edges_{os.path.basename(image_path)}", edges)
+    # Save the segmented image
+    cv2.imwrite(f"output/segmented_{os.path.basename(image_path)}", segmented_image)
+    # Save the morphologically transformed image
+    cv2.imwrite(f"output/morph_{os.path.basename(image_path)}", image_morph)
+    # Save the final image with emoji overlay
+    cv2.imwrite(f"output/final_{os.path.basename(image_path)}", image_resized)
 
     # Resize the final image for a larger display
     display_scale = 1.5
