@@ -33,7 +33,7 @@ def segment_icon(path):
     return [output_path, mask]
 
 # Source: https://colab.research.google.com/github/googlesamples/mediapipe/blob/main/examples/interactive_segmentation/python/interactive_segmenter.ipynb#scrollTo=Yl_Oiye4mUuo
-def segment_iconv2(path, keypoint=(0.68, 0.68), output_path="test2", model_path=os.path.abspath("Input/Other/magic_touch.tflite")):
+def segment_iconv2(path, keypoint=(0.68, 0.68), output_path="test2", model_path=os.path.relpath("Input/Other/magic_touch.tflite")):
     image = cv2.imread(path)
     cv2.imwrite(path, image)
     BG_COLOR = (0, 0, 0) # black

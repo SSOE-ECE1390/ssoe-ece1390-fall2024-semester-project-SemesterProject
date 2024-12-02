@@ -1,4 +1,5 @@
 import sys
+import mediapipe as mp
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QLabel, QPushButton, QFileDialog, QVBoxLayout, QWidget, QHBoxLayout
 )
