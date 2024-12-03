@@ -4,8 +4,6 @@ import numpy as np
 from fer import FER
 import math
 import os
-from HairDetectionDillon import detect_brown_short_hair
-from HairDetectionDillon import overlay_hair_emoji
 
 # Suppress TensorFlow warnings
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
@@ -16,7 +14,12 @@ mp_face_mesh = mp.solutions.face_mesh
 emotion_detector = FER(mtcnn=True)
 
 # Paths to images and emojis
-image_paths = ['Data/jim.jpg', 'Data/crying_stock_photo.png', 'Data/AngryMan.jpg', 'Data/SmilingGirl.jpg']
+image_paths = [
+    'Data/jim.jpg',
+    'Data/crying_stock_photo.png',
+    'Data/AngryMan.jpg',
+    'Data/SmilingGirl.jpg'
+]
 emoji_folder = 'emojis'
 
 # Emotion to emoji mapping
@@ -217,16 +220,30 @@ for image_path in image_paths:
                     emoji_bgr = emoji_rotated[:, :, :3]
                     alpha_mask = emoji_rotated[:, :, 3] / 255.0
                     roi = image_resized[y_min:y_max, x_min:x_max]
-                    image_altered = image_resized.copy()
+
                     if roi.shape[:2] == emoji_bgr.shape[:2]:
                         for c in range(3):
-                            roi[:, :, c] = (alpha_mask * emoji_bgr[:, :, c] +
-                                            (1 - alpha_mask) * roi[:, :, c])
+                            roi[:, :, c] = (
+                                alpha_mask * emoji_bgr[:, :, c] +
+                                (1 - alpha_mask) * roi[:, :, c]
+                            )
                         image_resized[y_min:y_max, x_min:x_max] = roi
                     else:
                         print("Size mismatch between ROI and emoji.")
                 else:
                     print("Emoji image does not have an alpha channel.")
+
+                # Hair color detection and overlay
+                hair_color, forehead_coords = detect_hair_color(
+                    image_resized, face_landmarks, width, height)
+                if hair_color and forehead_coords:
+                    print(f"Detected hair color: {hair_color}")
+                    hair_emoji_path = hair_emoji_map.get(hair_color)
+                    if hair_emoji_path:
+                        image_resized = overlay_hair_emoji(
+                            image_resized, hair_emoji_path, forehead_coords)
+                    else:
+                        print(f"No emoji found for hair color: {hair_color}")
         else:
             print("No facial landmarks detected.")
 
@@ -243,14 +260,15 @@ for image_path in image_paths:
     cv2.imwrite(f"output/segmented_{os.path.basename(image_path)}",
                 segmented_image)
     cv2.imwrite(f"output/morph_{os.path.basename(image_path)}", image_morph)
-    # Save the final image with emoji overlay
     cv2.imwrite(f"output/final_{os.path.basename(image_path)}", image_resized)
 
     # Display the final image
     display_scale = 1.5
     display_width = int(image_resized.shape[1] * display_scale)
     display_height = int(image_resized.shape[0] * display_scale)
-    image_display = cv2.resize(image_resized, (display_width, display_height), interpolation=cv2.INTER_LINEAR)
+    image_display = cv2.resize(
+        image_resized, (display_width, display_height),
+        interpolation=cv2.INTER_LINEAR)
 
     cv2.imshow('Emoji Face Swap', image_display)
     cv2.moveWindow('Emoji Face Swap', 200, 200)
