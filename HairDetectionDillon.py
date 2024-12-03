@@ -10,10 +10,13 @@ mp_face_mesh = mp.solutions.face_mesh
 
 # Paths to images and hair emoji
 image_paths = ['Data/jim.jpg', 'Data/crying_stock_photo.png', 'Data/AngryMan.jpg']
-hair_emoji_path = 'emojis/brown_short.png'
+hair_emoji_map = {
+    'brown': 'emojis/brown_short.png',
+    'blonde': 'emojis/blonde_short.png'
+}
 
-# Function to detect brown & short hair
-def detect_brown_short_hair(image, face_landmarks, width, height):
+# Function to detect hair color
+def detect_hair_color(image, face_landmarks, width, height):
     # Extract landmarks for the forehead region
     forehead_landmarks = [10, 338, 297, 332, 284]  # Example Mediapipe landmark indices around the forehead
     forehead_points = np.array(
@@ -23,7 +26,23 @@ def detect_brown_short_hair(image, face_landmarks, width, height):
     # Define the region above the forehead
     x_min, y_min = np.min(forehead_points, axis=0)
     x_max, y_max = np.max(forehead_points, axis=0)
-    return (x_min, y_min, x_max, y_max)
+    hair_region = image[max(0, y_min - int(0.5 * (y_max - y_min))):y_min, x_min:x_max]  # Expand above the forehead
+
+    # Convert the region to HSV for color detection
+    hsv = cv2.cvtColor(hair_region, cv2.COLOR_BGR2HSV)
+
+    # Define HSV ranges for brown and blonde
+    hair_colors = {
+        'blonde': ([20, 80, 80], [40, 255, 255]),  # Prioritize blonde detection (lighter colors)
+        'brown': ([10, 50, 20], [30, 255, 200])
+    }
+
+    for color, (lower, upper) in hair_colors.items():
+        mask = cv2.inRange(hsv, np.array(lower), np.array(upper))
+        if np.sum(mask) > 0:  # If significant pixels match the range
+            return color, (x_min, y_min, x_max, y_max)
+
+    return None, None  # No hair color detected
 
 # Function to overlay the emoji
 def overlay_hair_emoji(image, emoji_path, forehead_coords):
@@ -41,7 +60,7 @@ def overlay_hair_emoji(image, emoji_path, forehead_coords):
     # Adjust the emoji placement
     y_start = max(0, y_min - int(0.6 * emoji_height))  # Vertical position
     y_end = y_start + emoji_height
-    x_start = max(0, x_min - int(0.3 * emoji_width)) - 17 # Manual left shift
+    x_start = max(0, x_min - int(0.3 * emoji_width)) - 17  # Manual left shift
     x_end = x_start + emoji_width
 
     # Handle transparency (alpha channel)
@@ -87,10 +106,14 @@ for image_path in image_paths:
         # Check if landmarks are detected
         if results.multi_face_landmarks:
             for face_landmarks in results.multi_face_landmarks:
-                # Detect brown & short hair
-                forehead_coords = detect_brown_short_hair(image_resized, face_landmarks, width, height)
-                # Overlay the hair emoji
-                image_resized = overlay_hair_emoji(image_resized, hair_emoji_path, forehead_coords)
+                # Detect hair color
+                hair_color, forehead_coords = detect_hair_color(image_resized, face_landmarks, width, height)
+                if hair_color and forehead_coords:
+                    print(f"Detected hair color: {hair_color}")
+                    # Get the corresponding emoji path
+                    emoji_path = hair_emoji_map.get(hair_color)
+                    # Overlay the hair emoji
+                    image_resized = overlay_hair_emoji(image_resized, emoji_path, forehead_coords)
 
     # Resize the final image for output (increase size)
     output_scale = 2.0  # Scale up the image by 2x
