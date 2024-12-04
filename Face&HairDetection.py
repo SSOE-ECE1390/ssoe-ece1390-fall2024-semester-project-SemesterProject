@@ -67,14 +67,14 @@ def detect_hair_color(image, face_landmarks, width, height):
 
     # Refined hair color thresholds
     hair_colors = {
-        'brown': ([5, 40, 20], [30, 255, 180]),  # Wide range for brown tones
-        'blonde': ([15, 20, 150], [45, 120, 255]),  # Expanded range for blonde tones
+        'brown': ([5, 40, 20], [14, 209, 180]),  # Wide range for brown tones
+        'blonde': ([15, 20, 150], [40, 200, 255]),  # Expanded range for blonde tones
         'black': ([0, 0, 0], [180, 255, 50]),
         'ginger': ([5, 100, 150], [15, 255, 255]),
         'gray': ([0, 0, 60], [180, 20, 180])
     }
 
-    color_match_percentages = {}
+    color_match_percentages = {}    
     for color, (lower, upper) in hair_colors.items():
         mask = cv2.inRange(hsv, np.array(lower), np.array(upper))
         match_percentage = np.sum(mask > 0) / mask.size
