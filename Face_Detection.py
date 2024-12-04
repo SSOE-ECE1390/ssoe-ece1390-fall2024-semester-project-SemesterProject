@@ -3,11 +3,6 @@ import numpy as np
 import math
 import cv2
 
-from mediapipe.tasks import python
-from mediapipe.tasks.python import vision
-
-from Hair_Detection import detect_hair
-
 def detect_face(image_rgb, image_resized, width, height):
     # Initialize Mediapipe Face Mesh
     mp_face_mesh = mp.solutions.face_mesh
@@ -68,11 +63,6 @@ def detect_face(image_rgb, image_resized, width, height):
             
                 face_outer_points = [(int(face_landmarks.landmark[i].x * image_resized.shape[1]), 
                                       int(face_landmarks.landmark[i].y * image_resized.shape[0])) for i in face_outer_landmarks]
-                
-                image = detect_hair(image_resized, face_outer_points)
-                cv2.imshow('Hair Segmented', image)
-                cv2.waitKey(0)
-                cv2.destroyAllWindows()
                 
                 return angle, x_max, x_min, y_max, y_min
         else:
