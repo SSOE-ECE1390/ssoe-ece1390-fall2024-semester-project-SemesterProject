@@ -173,6 +173,23 @@ def rgb_to_closest_color_name(rgb):
         color_name = closest_name
     return color_name
 
+def readHairColor(filename, csv_path = "hair_colors.csv"):
+    try:
+        # Load the CSV file
+        hair_data = pd.read_csv(csv_path)
+
+        # Find the row corresponding to the given filename
+        row = hair_data.loc[hair_data['Image'] == filename]
+
+        if row.empty:
+            raise ValueError(f"No entry found for {filename} in the CSV file.")
+
+        # Extract the color
+        color = row['Color'].iloc[0]
+        return color
+    except FileNotFoundError:
+        raise FileNotFoundError(f"The CSV file at {csv_path} was not found.")
+
 # Paths to images and emojis
 image_paths = ['Data/AngryMan.jpg', 'Data/jim.jpg', 'Data/crying_stock_photo.png', 'Data/GingerMan.jpg']
 csv_path = 'hair_colors.csv'
