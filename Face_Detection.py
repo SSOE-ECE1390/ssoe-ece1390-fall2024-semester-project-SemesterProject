@@ -1,7 +1,6 @@
 import mediapipe as mp
 import numpy as np
 import math
-import cv2
 
 def detect_face(image_rgb, image_resized, width, height):
     # Initialize Mediapipe Face Mesh

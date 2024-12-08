@@ -1,9 +1,7 @@
 import cv2
 import os
 import matplotlib.pyplot as plt
-import numpy as np
 
-from Hair_Detection import detect_hair
 from Face_Detection import detect_face
 from Emoji_Swap import swap_emoji, detect_emotion
 
@@ -12,10 +10,9 @@ os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 #turn off FER/tensorflow debug msgs
 
 # Paths to images and emojis
-image_paths = {'Data/Tiger_Woods.jpeg', 'Data/jim.jpg', 'Data/crying_stock_photo.png'}
-temp_path = {'Data/jim.jpg'}
+image_paths = {'Data/AngryMan.jpg', 'Data/jim.jpg', 'Data/crying_stock_photo.png', 'Data/GingerMan.jpg'}
 
-for image_path in temp_path:
+for image_path in image_paths:
     # Load the image
     image = cv2.imread(image_path)
     image_filename = os.path.basename(image_path)
@@ -36,8 +33,8 @@ for image_path in temp_path:
     # Convert the resized image to RGB as Mediapipe requires
     image_rgb = cv2.cvtColor(image_resized, cv2.COLOR_BGR2RGB)
 
-    emotion = detect_emotion(image_rgb)
-    angle, x_max, x_min, y_max, y_min = detect_face(image_rgb, image_resized, width, height)
+    emotion = detect_emotion(image_rgb.copy())
+    angle, x_max, x_min, y_max, y_min = detect_face(image_rgb.copy(), image_resized, width, height)
     image_emoji = swap_emoji(image_resized.copy(), emotion, angle, x_max, x_min, y_max, y_min)
     
     # Display the final image
@@ -47,7 +44,7 @@ for image_path in temp_path:
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
-    plt.imshow(image_emoji)
-    output_filename = 'emoji_'+ image_filename 
+    plt.imshow(cv2.cvtColor(image_emoji, cv2.COLOR_BGR2RGB))
+    output_filename = 'final_'+ image_filename 
     plt.savefig(f'output/{output_filename}')
 

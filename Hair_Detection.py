@@ -1,12 +1,15 @@
 import mediapipe as mp
 import numpy as np
 import cv2
+import os
+import pandas as pd
+import webcolors
 
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 
+# Old function to try to watershed segment the hair
 def detect_hair(image, face_outer_points):
-    
     # Create face mask using outer face landmark points
     face_mask = np.zeros(image.shape[:2], dtype=np.uint8)
     face_outer_points = np.array(face_outer_points, dtype=np.int32).reshape((-1, 1, 2))
@@ -102,13 +105,12 @@ def detect_hair(image, face_outer_points):
     return image
 
 def mediapipeHairSegmentation(image):
-
-    # Create the options for ImageSegmenter
-    base_options = python.BaseOptions(model_asset_path = 'hair_segmenter.tflite')
-    options = vision.ImageSegmenterOptions(base_options = base_options, output_category_mask = True)
-
-    # Morphological kernel for erosion
     kernel = np.ones((5, 5), np.uint8)  # Adjust kernel size for more/less erosion
+    
+    # Create the option/model for ImageSegmenter
+    model_asset_path = os.path.abspath("hair_segmenter.tflite")
+    base_options = python.BaseOptions(model_asset_path = model_asset_path)
+    options = vision.ImageSegmenterOptions(base_options = base_options, output_category_mask = True)
 
     # Create the image segmenter
     with vision.ImageSegmenter.create_from_options(options) as segmenter:
@@ -133,18 +135,69 @@ def mediapipeHairSegmentation(image):
         refined_condition = np.stack((refined_mask,) * 3, axis=-1).astype(bool)
         refined_hair_region = np.where(refined_condition, image_data, 0)
 
-        # Visualize the refined hair region
-        cv2.imshow(f'Refined Hair Region', refined_hair_region)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        # # Visualize the refined hair region
+        # cv2.imshow(f'Refined Hair Region', cv2.cvtColor(refined_hair_region, cv2.COLOR_BGR2RGB))
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
 
         # Calculate mean RGB values for the refined hair region
         hair_pixels = refined_hair_region[refined_condition].reshape(-1, 3)  # Extract RGB pixels
         if hair_pixels.size > 0:  # Ensure there are hair pixels
-            mean_rgb = hair_pixels.mean(axis=0)  # Calculate mean for each channel
-            print(f'Mean R: {mean_rgb[0]}, Mean G: {mean_rgb[1]}, Mean B: {mean_rgb[2]}')
-            return mean_rgb
+            mean_hair_color = hair_pixels.mean(axis=0)  # Calculate mean for each channel
+            print(f'Mean R: {mean_hair_color[0]}, Mean G: {mean_hair_color[1]}, Mean B: {mean_hair_color[2]}')
+            return mean_hair_color
         else:
             print("No hair detected in the refined region.")
 
+# Convert the rgb values to a color name
+def rgb_to_closest_color_name(rgb):
+    try:
+        # Try to get the exact color name
+        color_name = webcolors.rgb_to_name(tuple(map(int, rgb)), spec = "css3")
+    except ValueError:
+        # If exact match is not found, calculate the closest name
+        closest_name = None
+        min_distance = float('inf')
+
+        # Iterate over all CSS3 colors
+        for name in webcolors.names("css3"):
+            print("Color Names:",name)
+            # Convert the color name to its RGB equivalent
+            color_rgb = webcolors.name_to_rgb(name)
+            # Calculate the Euclidean distance
+            distance = sum((rgb[i] - color_rgb[i]) ** 2 for i in range(3))
+            if distance < min_distance:
+                min_distance = distance
+                closest_name = name
+
+        color_name = closest_name
+    return color_name
+
+# Paths to images and emojis
+image_paths = ['Data/AngryMan.jpg', 'Data/jim.jpg', 'Data/crying_stock_photo.png', 'Data/GingerMan.jpg']
+csv_path = 'hair_colors.csv'
+
+all_hair_data = []
+
+for image_path in image_paths: # For each image in image path
+    # Load the image
+    image = cv2.imread(image_path)
+    image_filename = os.path.basename(image_path)
+    print("Image Filename: ", image_filename)
+
+    mean_hair_color = mediapipeHairSegmentation(image)
+
+    if mean_hair_color is not None:
+        color_name = rgb_to_closest_color_name(mean_hair_color)
+        print
+        all_hair_data.append({
+            'Image': os.path.basename(image_path),
+            'Mean R': mean_hair_color[0],
+            'Mean G': mean_hair_color[1],
+            'Mean B': mean_hair_color[2],
+            'Color': color_name
+        })
         
+if all_hair_data:
+    hair_data_df = pd.DataFrame(all_hair_data)
+    hair_data_df.to_csv(csv_path, index=False)

@@ -21,6 +21,7 @@ image_paths = [
     'Data/Dillon.jpg',
     'Data/GingerMan.jpg'
 ]
+
 emoji_folder = 'emojis'
 output_folder = "output"
 os.makedirs(output_folder, exist_ok=True)
