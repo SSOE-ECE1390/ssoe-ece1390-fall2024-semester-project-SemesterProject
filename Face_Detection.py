@@ -17,7 +17,11 @@ image_paths = [
     'output/HairAddition_jim.jpg',
     'output/HairAddition_crying_stock_photo.png',
     'output/HairAddition_AngryMan.jpg',
-    'output/HairAddition_GingerMan.jpg'
+    'output/HairAddition_GingerMan.jpg',
+    'Data/AngryMan.jpg',
+    'Data/crying_stock_photo.png',
+    'Data/GingerMan.jpg',
+    'Data/jim.jpg'
 ]
 
 emoji_folder = 'emojis'
