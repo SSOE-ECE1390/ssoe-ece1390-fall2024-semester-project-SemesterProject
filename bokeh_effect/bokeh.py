@@ -3,7 +3,26 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-def bokeh_blur(image, kernel, mask, gamma=3.3):
+def bokeh_blur(image, kernel, gamma=5):
+
+    # Convert to linear (gamma correction, as images are stored in sRGB)
+    # 2.2 is the "default" gamma, higher values produce brighter results for
+    # larger radius blur
+    image_linear = np.power(np.float32(image)/255, gamma)
+
+    # Manipulate kernel to right format
+    kernel = np.float32(kernel) / np.sum(kernel)
+    kernel = np.flip(kernel)
+
+    # Apply Bokeh Filter and mask to result to background
+    image_bokeh_linear = cv2.filter2D(image_linear, ddepth=-1, kernel=kernel)
+
+    # Apply inverse gamma correction
+    image_bokeh = np.ubyte(np.power(image_bokeh_linear, 1/gamma) * 255)
+    return image_bokeh
+
+
+def bokeh_blur_mask(image, kernel, mask, gamma=3.3):
 
     # Mask original image for background and foreground
     mask_inv = cv2.bitwise_not(mask)

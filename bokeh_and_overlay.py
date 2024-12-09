@@ -65,7 +65,7 @@ def bokeh_bg(face_path, icon_path, background_path, bokeh_selector=1, bokeh_effe
         plt.title("Resized Icon (for Bokeh Effect)")
         plt.show()
         
-    background_with_bokeh = bokeh.bokeh_blur(background, kernel, cv2.cvtColor(background, cv2.COLOR_BGR2GRAY))
+    background_with_bokeh = bokeh.bokeh_blur(background, kernel)
     plt.imshow(cv2.cvtColor(background_with_bokeh, cv2.COLOR_BGR2RGB))
     plt.title("Bokeh Background")
     plt.show()
@@ -87,12 +87,12 @@ def compilation(face_path, icon_path, background_path):
     return result
 
 # example usage:
-# face_path = os.path.abspath("Input/Face/HL-005.jpeg")
-# icon_path = os.path.abspath("Input/Icon/spongebob.jpeg")
-# background_path = os.path.abspath("Input/Background/fireworks.jpg")
-# # icon_mask = icon_segmentation.segment_iconv2(icon_path)
-# # bokeh_background = bokeh_bg(face_path, icon_path, background_path, bokeh_selector=0)
-# # result = img_overlayv2.img_overlay(bokeh_background, icon_path)
-# result = compilation(face_path, icon_path, background_path)
+face_path = os.path.abspath("Input/Face/animal-031.jpg")
+icon_path = os.path.abspath("Input/Icon/10123.png")
+background_path = os.path.abspath("Input/Background/P1020589.JPG")
+# icon_mask = icon_segmentation.segment_iconv2(icon_path)
+# bokeh_background = bokeh_bg(face_path, icon_path, background_path, bokeh_selector=0)
+# result = img_overlayv2.img_overlay(bokeh_background, icon_path)
+result = compilation(face_path, icon_path, background_path)
 
 
