@@ -4,7 +4,7 @@ import random
 import matplotlib.pyplot as plt
 
 def random_adjust_brightness(img):
-    img.astype("uint8")
+    img = img.astype("int16")
     print("Runnning random_adjust_brightness...")
     
     val = 0 
@@ -13,8 +13,8 @@ def random_adjust_brightness(img):
     print("using random value: ", val)
     print("\n")
 
-    matrix = np.ones(img.shape, dtype="uint8") * val
+    matrix = np.ones(img.shape, dtype="int16") * val
 
-    new_img = np.clip(cv2.add(img, matrix), 0, 255)
+    new_img = np.clip(cv2.add(img, matrix), 0, 255).astype("uint8")
     plt.imsave("Output/randomly_enhanced_img.png", new_img)
     return new_img

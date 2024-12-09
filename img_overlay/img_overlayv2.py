@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import os
 import matplotlib.pyplot as plt
+from extra_features import img_enhance
 
 def img_overlay(image, icon_path, icon_mask_path=os.path.abspath("Output/SeparateIcon/test2.jpeg"), output_path="test"):
     # Load Haar cascade classifiers for face detection
@@ -63,6 +64,9 @@ def img_overlay(image, icon_path, icon_mask_path=os.path.abspath("Output/Separat
         for c in range(0, 3):  # Apply to each BGR channel
             img[overlay_y:overlay_y + overlay_resized.shape[0], overlay_x:overlay_x + overlay_resized.shape[1], c] = \
                 np.where(binary_mask_resized > 0, overlay_resized[:, :, c], img[overlay_y:overlay_y + overlay_resized.shape[0], overlay_x:overlay_x + overlay_resized.shape[1], c])
+
+    # Apply image enhancement
+    img = img_enhance.random_adjust_brightness(img)
 
     # Save the final image
     plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
