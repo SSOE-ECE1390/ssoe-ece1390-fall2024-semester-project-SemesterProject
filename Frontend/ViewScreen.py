@@ -86,7 +86,6 @@ class ViewScreen(QWidget):
             apply_waves_hairstyle(input_image_path, output_image_path)
 
         if output_image_path:
-            #cv.imwrite(output_image_path, cv.imread(self.current_image_path))
             self.set_image(output_image_path)
 
     def take_new_photo(self):
