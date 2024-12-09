@@ -15,7 +15,7 @@ def apply_curly_hairstyle(input_path, output_path, color_correction = 0):
     applies the curly hairstyle to the image
     '''
     anchor_points = findingAnchorPoints(input_path)[2:6]      #left forehead, right forehead, left ear, right ear
-    hair_anchor = [(200, 400), (650, 400), (120, 550), (710, 550)]
+    hair_anchor = [(200, 400), (650, 400), (120, 550), (740, 550)]
     apply_hair(input_path, output_path, 'Hairstyles/curly.png', anchor_points, hair_anchor)
 
 def apply_dread_hairstyle(input_path, output_path, color_correction = 0):
