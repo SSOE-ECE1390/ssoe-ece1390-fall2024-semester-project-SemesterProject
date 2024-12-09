@@ -42,7 +42,6 @@ emotion_emoji_dict = {
 
 # Enhanced Emotion Detection
 def detect_emotion(image):
-    """Detects facial emotion using the FER library."""
     emotion_results = emotion_detector.detect_emotions(image)
     if not emotion_results:
         return 'neutral'
@@ -52,9 +51,8 @@ def detect_emotion(image):
         return 'neutral'
     return max(emotions, key=emotions.get)
 
-# Function to overlay emoji based on face bounding box
+# Overlays emoji based on face bounding box
 def overlay_face_emoji(image, emoji_path, face_bbox):
-    """Overlay an emoji image onto the detected face region."""
     x_min, y_min, x_max, y_max = face_bbox
 
     # Load emoji with alpha channel
@@ -87,7 +85,7 @@ def overlay_face_emoji(image, emoji_path, face_bbox):
         )
     return image
 
-# Main Processing Loop
+# Main processing loop
 for image_path in image_paths:
     image = cv2.imread(image_path)
     if image is None:

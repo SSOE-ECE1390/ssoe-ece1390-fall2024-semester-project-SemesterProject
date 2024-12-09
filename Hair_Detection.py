@@ -28,8 +28,8 @@ color_category_map = {
     
 }
 
+# segment hair with mediapipe
 def mediapipeHairSegmentation(image):
-    """Segment hair region using MediaPipe ImageSegmenter."""
     kernel = np.ones((5, 5), np.uint8)
     model_asset_path = os.path.abspath("hair_segmenter.tflite")
     base_options = python.BaseOptions(model_asset_path=model_asset_path)
@@ -44,8 +44,8 @@ def mediapipeHairSegmentation(image):
         refined_mask = cv2.erode(binary_mask, kernel, iterations=3)
         return refined_mask
 
+#Overlay emoji using mask
 def overlay_emoji(image, emoji_path, mask):
-    """Overlay an emoji image onto the detected hair region using the mask."""
     # Load emoji image with alpha channel
     emoji = cv2.imread(emoji_path, cv2.IMREAD_UNCHANGED)
 
@@ -67,8 +67,8 @@ def overlay_emoji(image, emoji_path, mask):
         image[y:y+h, x:x+w, c] = (1 - emoji_alpha) * image[y:y+h, x:x+w, c] + emoji_alpha * emoji_rgb[:, :, c]
     return image
 
+# Process hair color and output with hair emoji (using CSV)
 def process_images_from_csv(csv_path, image_dir, output_dir):
-    """Read hair colors from CSV and overlay emojis on corresponding images."""
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
