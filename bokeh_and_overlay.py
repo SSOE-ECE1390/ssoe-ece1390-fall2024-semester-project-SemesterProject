@@ -87,12 +87,12 @@ def compilation(face_path, icon_path, background_path):
     return result
 
 # example usage:
-face_path = os.path.abspath("Input/Face/animal-031.jpg")
-icon_path = os.path.abspath("Input/Icon/10123.png")
-background_path = os.path.abspath("Input/Background/P1020589.JPG")
+# face_path = os.path.abspath("Input/Face/animal-031.jpg")
+# icon_path = os.path.abspath("Input/Icon/10123.png")
+# background_path = os.path.abspath("Input/Background/P1020589.JPG")
 # icon_mask = icon_segmentation.segment_iconv2(icon_path)
 # bokeh_background = bokeh_bg(face_path, icon_path, background_path, bokeh_selector=0)
 # result = img_overlayv2.img_overlay(bokeh_background, icon_path)
-result = compilation(face_path, icon_path, background_path)
+# result = compilation(face_path, icon_path, background_path)
 
 
