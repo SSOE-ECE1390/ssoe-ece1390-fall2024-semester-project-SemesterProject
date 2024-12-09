@@ -13,7 +13,7 @@ hair_emoji_map = {
     'black': 'emojis/black_short.png',
     'red': 'emojis/red_short.png',
     'gray': 'emojis/gray_short.png',
-    
+    'ginger': 'emojis/ginger_short.png'
 }
 
 # Custom color category mapping
