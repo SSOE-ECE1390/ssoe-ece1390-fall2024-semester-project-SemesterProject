@@ -50,11 +50,11 @@ def detect_hair(image, face_outer_points):
     print("Face outer points: ", face_outer_points[1])
     hair_starting_marker = face_outer_points[1]
     
-    # Convert markers to uint8 type as required by cv2.watershed
+    # Convert markers to uint8 type 
     markers = np.zeros(image.shape[:2], dtype=np.int32)
     markers[face_mask == 255] = 1  # Face region
     markers[hair_starting_marker] = 2  # Hair region
-    # markers[background==1] = 3
+    
     
     # Draw circles on the annotated image
     for point in markers:
@@ -122,7 +122,7 @@ def mediapipeHairSegmentation(image):
         segmentation_result = segmenter.segment(mp_image)
         category_mask = segmentation_result.category_mask.numpy_view()
 
-        # Convert the BGR image to RGB for processing
+        # Convert the BGR image to RGB
         image_data = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
         # Create a binary mask from category_mask

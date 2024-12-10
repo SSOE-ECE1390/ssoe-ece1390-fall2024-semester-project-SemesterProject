@@ -71,8 +71,8 @@ def detect_hair_color(image, face_landmarks, width, height):
 
     # Refined hair color thresholds
     hair_colors = {
-        'brown': ([5, 40, 20], [14, 209, 180]),  # Wide range for brown tones
-        'blonde': ([15, 20, 150], [40, 200, 255]),  # Expanded range for blonde tones - modified for high saturation
+        'brown': ([5, 40, 20], [14, 209, 180]),  
+        'blonde': ([15, 20, 150], [40, 200, 255]),  
         'black': ([0, 0, 0], [180, 255, 50]),
         'ginger': ([5, 179, 150], [15, 255, 255]),
         'gray': ([0, 0, 60], [180, 20, 180])
@@ -98,7 +98,7 @@ def overlay_hair_emoji(image, emoji_path, forehead_coords, manual_shift=None):
         print(f"Error loading emoji: {emoji_path}")
         return image
 
-    emoji_width = int((x_max - x_min) * 3.2)  # Slightly bigger scaling factor
+    emoji_width = int((x_max - x_min) * 3.2)  
     emoji_height = int(emoji_width * (emoji.shape[0] / emoji.shape[1]))
     emoji_resized = cv2.resize(emoji, (emoji_width, emoji_height), interpolation=cv2.INTER_AREA)
 
@@ -106,7 +106,7 @@ def overlay_hair_emoji(image, emoji_path, forehead_coords, manual_shift=None):
     y_end = y_start + emoji_height
     x_start = max(0, x_min - int(0.3 * emoji_width) - 20)  # Manual shift to the left
     if manual_shift:
-        x_start += manual_shift  # Apply specific manual shift
+        x_start += manual_shift  
     x_end = x_start + emoji_width
 
     y_end = min(y_end, image.shape[0])
@@ -122,7 +122,7 @@ def overlay_hair_emoji(image, emoji_path, forehead_coords, manual_shift=None):
             )
     return image
 
-# Enhanced Emotion Detection
+
 def detect_emotion(image):
     emotion_results = emotion_detector.detect_emotions(image)
     if not emotion_results:
@@ -167,7 +167,7 @@ for image_path in image_paths:
                     print(f"Detected hair color: {hair_color}")
                     hair_emoji_path = hair_emoji_map.get(hair_color)
                     if hair_emoji_path:
-                        # Apply a manual shift for Dillon.jpg
+                        
                         manual_shift = -40 if "Dillon.jpg" in image_path else None
                         image_resized = overlay_hair_emoji(
                             image_resized, hair_emoji_path, forehead_coords, manual_shift)

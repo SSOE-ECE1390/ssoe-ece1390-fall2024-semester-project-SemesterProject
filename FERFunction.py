@@ -10,7 +10,7 @@ os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 emotion_detector = FER(mtcnn=True)
 
 # Path to the input image and output folder
-image_path = 'Data/crying_stock_photo.png'  # Input image
+image_path = 'Data/crying_stock_photo.png'  
 output_folder = "output"
 os.makedirs(output_folder, exist_ok=True)
 

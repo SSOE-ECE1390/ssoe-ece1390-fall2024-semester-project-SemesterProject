@@ -20,14 +20,7 @@ def detect_face(image_rgb, image_resized, width, height):
         # Check if landmarks are detected
         if results.multi_face_landmarks:
             for face_landmarks in results.multi_face_landmarks:
-                # # Draw facial landmarks on the image (optional)
-                # mp_drawing.draw_landmarks(
-                #     image_resized,
-                #     face_landmarks,
-                #     mp_face_mesh.FACEMESH_CONTOURS,
-                #     mp_drawing.DrawingSpec(color=(0, 255, 0), thickness=1, circle_radius=1),
-                #     mp_drawing.DrawingSpec(color=(0, 0, 255), thickness=1))
-
+            
                 # Get bounding box coordinates
                 face_coords = [(landmark.x, landmark.y) for landmark in face_landmarks.landmark]
                 face_coords = np.array(face_coords)
